@@ -5,20 +5,6 @@ const TraderClock = {
     ny:     { open: 13, close: 22, name: 'New York', tz: 'America/New_York' }
   },
 
-  WATCHLIST: [
-    { symbol: 'EURUSD', contract: 100000, pipSize: 0.0001, crypto: false },
-    { symbol: 'GBPUSD', contract: 100000, pipSize: 0.0001, crypto: false },
-    { symbol: 'USDJPY', contract: 100000, pipSize: 0.01, crypto: false },
-    { symbol: 'XAUUSD', contract: 100, pipSize: 0.01, crypto: false },
-    { symbol: 'GBPJPY', contract: 100000, pipSize: 0.01, crypto: false },
-    { symbol: 'BTCUSD', contract: 1, pipSize: 0.01, crypto: true },
-    { symbol: 'ETHUSD', contract: 1, pipSize: 0.01, crypto: true }
-  ],
-
-  _frozenPrices: {},
-  _realPrices: null,
-  _lastFetch: 0,
-
   EVENTS: [
     { name: 'NFP (Non-Farm Payrolls)', day: 5, impact: 'high', getDate: (y,m) => {
       const d = new Date(y, m, 1); d.setDate(1);
@@ -299,9 +285,6 @@ const TraderClock = {
     // ── Economic Calendar ──
     this.updateCalendar(now);
 
-    // ── Watchlist ──
-    this.updateWatchlist(now);
-
     this._initialTick = false;
   },
 
@@ -346,79 +329,9 @@ const TraderClock = {
     el.innerHTML = html;
   },
 
-  updateWatchlist(now) {
-    this.fetchPrices();
-    const el = document.getElementById('clock-watchlist');
-    const isWknd = this.isWeekend(now);
-    let html = '';
-    this.WATCHLIST.forEach(w => {
-      const isCrypto = w.crypto;
-      let price;
-      if (this._realPrices && this._realPrices[w.symbol] !== undefined) {
-        price = this._realPrices[w.symbol];
-      } else {
-        price = this.FALLBACK[w.symbol];
-      }
-      if (!price) { html += `<div class="wl-item"><span class="wl-sym">${w.symbol}</span><span class="wl-price">—</span></div>`; return; }
-      const pipVal = getEffectivePipValue(w.symbol, price);
-      const precision = w.pipSize <= 0.0001 ? 5 : w.pipSize <= 0.01 ? 3 : 2;
-      const frozen = isWknd && !isCrypto;
-      html += `<div class="wl-item">
-        <span class="wl-sym">${w.symbol}</span>
-        <span class="wl-price${frozen ? ' wl-frozen' : ''}">${price.toFixed(precision)}</span>
-        <span class="wl-pip">$${pipVal.toFixed(2)}/pip</span>
-        <span class="wl-perlot">$${(pipVal * 10).toFixed(2)}/10pip</span>
-        ${frozen ? '<span class="wl-closed">Markets Closed</span>' : ''}
-      </div>`;
-    });
-    el.innerHTML = html;
-  },
 
-  FALLBACK: { EURUSD: 1.1569, GBPUSD: 1.3348, USDJPY: 153.47, XAUUSD: 2315.0, GBPJPY: 204.89, BTCUSD: 67892, ETHUSD: 3512 },
 
-  async fetchPrices() {
-    const now = Date.now();
-    if (now - this._lastFetch < 30000) return;
-    this._lastFetch = now;
-    const p = { ...this.FALLBACK };
-    try {
-      const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR,GBP,JPY');
-      const data = await res.json();
-      if (data.rates) {
-        p.EURUSD = +(1 / data.rates.EUR).toFixed(5);
-        p.GBPUSD = +(1 / data.rates.GBP).toFixed(5);
-        p.USDJPY = +data.rates.JPY.toFixed(3);
-      }
-    } catch(e) {
-      try {
-        const alt = await fetch('https://open.er-api.com/v6/latest/USD');
-        const d2 = await alt.json();
-        if (d2.rates) {
-          p.EURUSD = +(1 / d2.rates.EUR).toFixed(5);
-          p.GBPUSD = +(1 / d2.rates.GBP).toFixed(5);
-          p.USDJPY = +d2.rates.JPY.toFixed(3);
-        }
-      } catch(e2) {}
-    }
-    try {
-      const res2 = await fetch('https://api.frankfurter.app/latest?from=GBP&to=JPY');
-      const data2 = await res2.json();
-      if (data2.rates) p.GBPJPY = +data2.rates.JPY.toFixed(2);
-    } catch(e) {
-      try {
-        const alt2 = await fetch('https://open.er-api.com/v6/latest/GBP');
-        const d3 = await alt2.json();
-        if (d3.rates) p.GBPJPY = +d3.rates.JPY.toFixed(2);
-      } catch(e2) { p.GBPJPY = +(p.GBPUSD * p.USDJPY).toFixed(2); }
-    }
-    try {
-      const res3 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
-      const data3 = await res3.json();
-      if (data3.bitcoin) p.BTCUSD = data3.bitcoin.usd;
-      if (data3.ethereum) p.ETHUSD = data3.ethereum.usd;
-    } catch(e) {}
-    this._realPrices = p;
-  },
+
 
   start() {
     this.tick();

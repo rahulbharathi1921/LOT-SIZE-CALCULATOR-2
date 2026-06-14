@@ -1269,29 +1269,6 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin
 }
 .cal-empty { color: var(--text-3); font-size: 12px; text-align: center; padding: 12px; }
 
-/* Watchlist */
-.watchlist-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  gap: 8px;
-}
-.wl-item {
-  background: var(--bg-root);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  text-align: center;
-}
-.wl-sym { font-size: 12px; font-weight: 700; color: var(--accent); }
-.wl-price { font-family: var(--mono); font-size: 11px; color: var(--text); }
-.wl-price.wl-frozen { opacity: 0.5; }
-.wl-closed { font-size: 8px; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.05em; }
-.wl-pip { font-family: var(--mono); font-size: 10px; color: var(--green); }
-.wl-perlot { font-family: var(--mono); font-size: 9px; color: var(--text-3); }
-
 /* Session Alerts toggle */
 .alert-row {
   display: flex;
@@ -1338,7 +1315,6 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin
 
 /* Clock responsive */
 @media (max-width: 860px) {
-  .watchlist-grid { grid-template-columns: 1fr 1fr; }
   .cal-item { flex-wrap: wrap; gap: 4px; }
   .clock-masters { grid-template-columns: 1fr; }
   .clock-sessions { grid-template-columns: 1fr; }
