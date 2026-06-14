@@ -5,18 +5,6 @@ const TraderClock = {
     ny:     { open: 13, close: 22, name: 'New York', tz: 'America/New_York' }
   },
 
-  EVENTS: [
-    { name: 'NFP (Non-Farm Payrolls)', day: 5, impact: 'high', getDate: (y,m) => {
-      const d = new Date(y, m, 1); d.setDate(1);
-      while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
-      return d;
-    }},
-    { name: 'FOMC Rate Decision', day: null, impact: 'high', getDate: (y,m) => new Date(y, m, Math.random() > 0.5 ? 20 : 21) },
-    { name: 'CPI (US Inflation)', day: null, impact: 'high', getDate: (y,m) => new Date(y, m, [10,12,12,10,11,11,11,10,11,10,10,12][m] || 10) },
-    { name: 'BOE Rate Decision', day: null, impact: 'high', getDate: (y,m) => new Date(y, m, [2,5,3,8,6,10,7,1,5,4,7,3][m] || 5) },
-    { name: 'ECB Rate Decision', day: null, impact: 'high', getDate: (y,m) => new Date(y, m, [14,11,10,13,12,10,8,9,6,11,11,10][m] || 10) }
-  ],
-
   _alertedSessions: {},
   _initialTick: true,
 
@@ -282,51 +270,12 @@ const TraderClock = {
     // Timeline
     this.updateTimeline(utcH, sessions);
 
-    // ── Economic Calendar ──
-    this.updateCalendar(now);
-
     this._initialTick = false;
   },
 
   updateTimeline(utcH) {
     const marker = document.getElementById('tl-now');
     if (marker) marker.style.left = Math.max(2, Math.min(98, (utcH / 24) * 100)) + '%';
-  },
-
-  updateCalendar(now) {
-    const el = document.getElementById('clock-calendar');
-    const today = new Date(now);
-    const y = today.getFullYear(), m = today.getMonth(), d = today.getDate();
-    const todayEvents = [];
-
-    this.EVENTS.forEach(e => {
-      const eventDate = e.getDate(y, m);
-      if (eventDate.getFullYear() === y && eventDate.getMonth() === m) {
-        const diff = Math.round((eventDate - today) / 86400000);
-        todayEvents.push({ name: e.name, date: eventDate, daysAway: diff, impact: e.impact });
-      }
-    });
-
-    todayEvents.sort((a, b) => a.daysAway - b.daysAway);
-
-    if (todayEvents.length === 0) {
-      el.innerHTML = '<div class="cal-empty">No high-impact events scheduled this month</div>';
-      return;
-    }
-
-    let html = '<div class="cal-list">';
-    todayEvents.forEach(ev => {
-      const impClass = ev.impact === 'high' ? 'cal-high' : 'cal-med';
-      const label = ev.daysAway === 0 ? 'Today' : ev.daysAway === 1 ? 'Tomorrow' : `In ${ev.daysAway}d`;
-      const dateStr = ev.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-      html += `<div class="cal-item ${impClass}">
-        <span class="cal-name">${ev.name}</span>
-        <span class="cal-date">${dateStr}</span>
-        <span class="cal-countdown">${label}</span>
-      </div>`;
-    });
-    html += '</div>';
-    el.innerHTML = html;
   },
 
 
