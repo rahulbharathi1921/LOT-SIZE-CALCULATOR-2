@@ -7,11 +7,18 @@ const TraderClock = {
 
   _alertedSessions: {},
   _initialTick: true,
+  _audioCtx: null,
 
-  now() { return new Date(); },
-
-  utcHours(d) {
-    return d.getUTCHours() + d.getUTCMinutes() / 60 + d.getUTCSeconds() / 3600;
+  playBeep() {
+    try {
+      if (!this._audioCtx) this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = this._audioCtx.createOscillator();
+      const gain = this._audioCtx.createGain();
+      osc.connect(gain); gain.connect(this._audioCtx.destination);
+      osc.frequency.value = 880;
+      gain.gain.value = 0.12;
+      osc.start(); osc.stop(this._audioCtx.currentTime + 0.3);
+    } catch(e) {}
   },
 
   isDST(tz) {
@@ -19,8 +26,11 @@ const TraderClock = {
     const jan = new Date(d.getFullYear(), 0, 1);
     const jul = new Date(d.getFullYear(), 6, 1);
     const opts = { timeZone: tz, day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
-    const janH = parseInt(jan.toLocaleString('en-US', opts).match(/(\d+):/)[1], 10);
-    const julH = parseInt(jul.toLocaleString('en-US', opts).match(/(\d+):/)[1], 10);
+    const janMatch = jan.toLocaleString('en-US', opts).match(/(\d+):/);
+    const julMatch = jul.toLocaleString('en-US', opts).match(/(\d+):/);
+    if (!janMatch || !julMatch) return false;
+    const janH = parseInt(janMatch[1], 10);
+    const julH = parseInt(julMatch[1], 10);
     return julH !== janH;
   },
 
@@ -263,7 +273,7 @@ const TraderClock = {
       weekendEl.style.display = 'block';
       const target = new Date(now);
       target.setUTCDate(target.getUTCDate() + ((1 - target.getUTCDay() + 7) % 7 || 7));
-      target.setUTCHours(22, 0, 0, 0);
+      target.setUTCHours(0, 0, 0, 0);
       document.getElementById('clock-weekend-cd').textContent = this.fmtDHMS((target - now) / 1000);
     } else { weekendEl.style.display = 'none'; }
 
@@ -274,6 +284,13 @@ const TraderClock = {
   },
 
   updateTimeline(utcH) {
+    const track = document.getElementById('clock-timeline');
+    if (!track) return;
+    const events = track.querySelectorAll('.tl-event');
+    events.forEach(function(el) {
+      var t = parseFloat(el.getAttribute('data-time'));
+      el.style.left = Math.max(0, Math.min(96, (t / 24) * 100)) + '%';
+    });
     const marker = document.getElementById('tl-now');
     if (marker) marker.style.left = Math.max(2, Math.min(98, (utcH / 24) * 100)) + '%';
   },

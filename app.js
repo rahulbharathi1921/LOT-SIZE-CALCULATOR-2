@@ -58,24 +58,26 @@ const App = {
     this.updateDashboard();
   },
 
-  saveAccount(val) { localStorage.setItem('prorisk_account', val); },
+  saveAccount(val) { try { localStorage.setItem('prorisk_account', val); } catch(e) {} },
   loadAccount() {
-    const val = localStorage.getItem('prorisk_account');
-    if (val) {
-      this.syncAccount(val, null);
-    }
+    try {
+      const val = localStorage.getItem('prorisk_account');
+      if (val) {
+        this.syncAccount(val, null);
+      }
+    } catch(e) {}
   },
 
   setupTheme() {
-    const saved = localStorage.getItem('edge_theme') || 'dark';
+    const saved = (function() { try { return localStorage.getItem('edge_theme'); } catch(e) { return null; } })() || 'dark';
     const btn = document.getElementById('theme-toggle');
     document.documentElement.className = saved === 'light' ? 'light-mode' : 'dark-mode';
-    btn.textContent = saved === 'light' ? '☀️' : '🌙';
+    btn.textContent = saved === 'light' ? '🌙' : '☀️';
     btn.addEventListener('click', function() {
       const isLight = document.documentElement.className === 'light-mode';
       document.documentElement.className = isLight ? 'dark-mode' : 'light-mode';
       btn.textContent = isLight ? '🌙' : '☀️';
-      localStorage.setItem('edge_theme', isLight ? 'dark' : 'light');
+      try { localStorage.setItem('edge_theme', isLight ? 'dark' : 'light'); } catch(e) {};
     });
   },
 
@@ -180,7 +182,7 @@ const App = {
 
   buildLotCopyText() {
     var lines = [];
-    lines.push('EDGE RISK REPORT');
+    lines.push('FORREX RISK REPORT');
     lines.push('Symbol: ' + document.getElementById('lot-symbol').value);
     lines.push('Direction: ' + document.getElementById('lot-direction').value.toUpperCase());
     lines.push('Account: $' + UI.getValue('lot-account'));
@@ -352,6 +354,11 @@ const App = {
     UI.toast('Saved to journal', 'success');
   },
 
+  escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  },
+
   renderJournal() {
     var tbody = document.getElementById('journal-tbody');
     if (App.trades.length === 0) {
@@ -360,7 +367,8 @@ const App = {
       tbody.innerHTML = App.trades.map(function(t) {
         var dirText = t.direction === 'long' ? 'Long' : 'Short';
         var pnlClass = t.pnl >= 0 ? 'positive' : 'negative';
-        return '<tr><td>' + t.date + '</td><td><strong>' + t.symbol + '</strong></td><td>' + dirText + '</td><td class="mono">' + (t.entry || '\u2014') + '</td><td class="mono">' + (t.exit || '\u2014') + '</td><td class="mono">' + (t.lot || '\u2014') + '</td><td class="mono ' + pnlClass + '">' + Calc.fmtUSD(t.pnl) + '</td><td>' + (t.notes || '\u2014') + '</td><td><button class="btn btn-sm btn-danger" onclick="App.deleteTrade(' + t.id + ')">Delete</button></td></tr>';
+        var safeNotes = t.notes ? App.escapeHtml(t.notes) : '\u2014';
+        return '<tr><td>' + t.date + '</td><td><strong>' + App.escapeHtml(t.symbol) + '</strong></td><td>' + dirText + '</td><td class="mono">' + (t.entry || '\u2014') + '</td><td class="mono">' + (t.exit || '\u2014') + '</td><td class="mono">' + (t.lot || '\u2014') + '</td><td class="mono ' + pnlClass + '">' + Calc.fmtUSD(t.pnl) + '</td><td>' + safeNotes + '</td><td><button class="btn btn-sm btn-danger" onclick="App.deleteTrade(' + t.id + ')">Delete</button></td></tr>';
       }).join('');
     }
     App.updateJournalStats();
@@ -377,7 +385,7 @@ const App = {
     var total = App.trades.length;
     var wins = App.trades.filter(function(t) { return t.pnl > 0; }).length;
     var wr = total > 0 ? (wins / total) * 100 : 0;
-    var tpl = App.trades.reduce(function(s, t) { return s + t.pnl; }, 0);
+    var tpl = App.trades.reduce(function(s, t) { return s + (parseFloat(t.pnl) || 0); }, 0);
     var pf = Calc.profitFactor(App.trades);
     document.getElementById('journal-total').textContent = total;
     document.getElementById('journal-winrate').textContent = Calc.fmtPct(wr);
@@ -427,10 +435,12 @@ const App = {
     URL.revokeObjectURL(url);
   },
 
-  saveTradesToStorage() { localStorage.setItem('prorisk_trades', JSON.stringify(App.trades)); },
+  saveTradesToStorage() { try { localStorage.setItem('prorisk_trades', JSON.stringify(App.trades)); } catch(e) {} },
   loadTradesFromStorage() {
-    var stored = localStorage.getItem('prorisk_trades');
-    if (stored) { App.trades = JSON.parse(stored); App.renderJournal(); }
+    try {
+      var stored = localStorage.getItem('prorisk_trades');
+      if (stored) { App.trades = JSON.parse(stored); App.renderJournal(); }
+    } catch(e) {}
   },
 
   setupDrawdown() {

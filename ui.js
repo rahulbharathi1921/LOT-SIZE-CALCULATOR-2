@@ -302,7 +302,7 @@ const UI = {
       const tickVal = pipVal / 10;
       this.setText('pip-value', Calc.fmtUSD(pipVal));
       this.setText('tick-value', Calc.fmtUSD(tickVal));
-      this.setText('point-value', Calc.fmtUSD(pipVal));
+      this.setText('point-value', Calc.fmtUSD(tickVal));
       this.setText('pip-10', Calc.fmtUSD(pipVal * 10));
       this.setText('pip-100', Calc.fmtUSD(pipVal * 100));
     } catch (err) { console.error('Pip calc error:', err); }
@@ -435,7 +435,7 @@ const UI = {
         var riskAmt = bal * (riskPct / 100);
         bal = bal - riskAmt;
         var ddPct = ((account - bal) / account) * 100;
-        if (bal <= 0) { h += '<tr><td>' + i + '</td><td colspan="3" style="color:var(--danger)">Account depleted</td></tr>'; break; }
+        if (bal <= 0) { h += '<tr><td>' + i + '</td><td colspan="3" style="color:var(--red)">Account depleted</td></tr>'; break; }
         h += '<tr><td>' + i + '</td><td>' + Calc.fmtUSD(riskAmt) + '</td><td>' + Calc.fmtUSD(bal) + '</td><td>' + Calc.fmtPct(ddPct) + '</td></tr>';
       }
       h += '</tbody></table>';
