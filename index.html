@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EDGE — Risk Management</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">E</div>
+      <div class="brand-text">
+        <span class="brand-name">EDGE</span>
+        <span class="brand-sub">Risk Suite</span>
+      </div>
+    </div>
+
+    <nav class="nav" role="tablist">
+      <button class="nav-item active" data-tab="lot" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M3 10h14M3 6h14M3 14h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Position Sizing
+      </button>
+      <button class="nav-item" data-tab="pip" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 7v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Pip Value
+      </button>
+      <button class="nav-item" data-tab="profit" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M4 14l4-4 3 3 5-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Profit / P&L
+      </button>
+      <button class="nav-item" data-tab="rr" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M10 3v14M5 8l5-5 5 5M5 15l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Risk : Reward
+      </button>
+      <button class="nav-item" data-tab="margin" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="5" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h6M7 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Margin
+      </button>
+      <button class="nav-item" data-tab="propfirm" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 6h6l-5 3.5 2 6L10 14l-5 3.5 2-6L2 8h6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        Prop Firm
+      </button>
+      <button class="nav-item" data-tab="dd" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M3 5l4 6 3-3 4 5 3-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Drawdown
+      </button>
+      <button class="nav-item" data-tab="journal" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="4" y="3" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Journal
+      </button>
+      <button class="nav-item" data-tab="dashboard" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+        Dashboard
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="formula-badge">Formulas verified ✓</div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══ -->
+  <main class="main">
+
+    <!-- Top bar metrics -->
+    <div class="topbar">
+      <div class="metric"><span class="metric-lbl">Account</span><span class="metric-val" id="mtr-balance">$10,000</span></div>
+      <div class="metric-divider"></div>
+      <div class="metric"><span class="metric-lbl">Risk / Trade</span><span class="metric-val accent" id="mtr-risk">$100</span></div>
+      <div class="metric-divider"></div>
+      <div class="metric"><span class="metric-lbl">Lot Size</span><span class="metric-val accent" id="mtr-lot">—</span></div>
+      <div class="metric-divider"></div>
+      <div class="metric"><span class="metric-lbl">R : R</span><span class="metric-val green" id="mtr-rr">—</span></div>
+    </div>
+
+    <!-- ══════════════ POSITION SIZING ══════════════ -->
+    <section class="panel active" id="lot" role="tabpanel">
+      <div class="panel-title">Position Sizing</div>
+
+      <div class="two-col">
+        <!-- LEFT: Inputs -->
+        <div class="col-inputs">
+
+          <!-- Symbol Setup -->
+          <div class="section-label">Setup</div>
+          <div class="row-2">
+            <div class="field">
+              <label>Asset Type</label>
+              <select id="lot-asset-type">
+                <option value="forex">Forex</option>
+                <option value="metal">Metals</option>
+                <option value="crypto">Crypto</option>
+                <option value="index">Indices</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Symbol</label>
+              <select id="lot-symbol"></select>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label>Broker</label>
+              <select id="lot-broker">
+                <option value="generic">Generic</option>
+                <option value="ftmo">FTMO</option>
+                <option value="goat">Goat Funded</option>
+                <option value="icmarkets">IC Markets</option>
+                <option value="exness">Exness</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Account (USD)</label>
+              <input type="number" id="lot-account" value="10000" step="any" />
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-label">Risk</div>
+
+          <div class="row-3">
+            <div class="field">
+              <label>Risk %</label>
+              <input type="number" id="lot-risk" value="1" step="0.1" min="0" max="100" />
+            </div>
+            <div class="field">
+              <label>Risk Amount</label>
+              <input type="number" id="lot-risk-amount" readonly />
+            </div>
+            <div class="field">
+              <label>Direction</label>
+              <select id="lot-direction">
+                <option value="buy">Buy / Long</option>
+                <option value="sell">Sell / Short</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="section-label">Levels</div>
+
+          <div class="row-3">
+            <div class="field">
+              <label>Entry</label>
+              <input type="number" id="lot-entry" value="1.0850" step="any" />
+            </div>
+            <div class="field">
+              <label>Stop Loss</label>
+              <input type="number" id="lot-sl" value="1.0800" step="any" />
+            </div>
+            <div class="field">
+              <label>Take Profit</label>
+              <input type="number" id="lot-tp" value="1.0950" step="any" />
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="field">
+              <label>Spread <span class="field-hint">(pips)</span></label>
+              <input type="number" id="lot-spread" value="0" step="0.1" min="0" />
+            </div>
+            <div class="field">
+              <label>Commission <span class="field-hint">($/lot)</span></label>
+              <input type="number" id="lot-commission" value="0" step="0.01" min="0" />
+            </div>
+          </div>
+
+          <details class="adv-block">
+            <summary>Advanced Settings</summary>
+            <div class="adv-body">
+              <div class="row-3">
+                <div class="field"><label>Contract Size</label><input type="number" id="lot-contract" value="100000" step="any" /></div>
+                <div class="field"><label>Pip Size</label><input type="number" id="lot-pip" value="0.0001" step="any" /></div>
+                <div class="field"><label>Tick Size</label><input type="number" id="lot-tick" value="0.00001" step="any" /></div>
+              </div>
+              <div class="row-3">
+                <div class="field"><label>Pip Value / lot</label><input type="number" id="lot-pip-value" value="10" step="any" /></div>
+                <div class="field"><label>Lot Step</label><input type="number" id="lot-step" value="0.01" step="any" /></div>
+                <div class="field"><label>Leverage</label><input type="number" id="lot-leverage" value="100" step="any" /></div>
+              </div>
+            </div>
+          </details>
+
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="lot-reset">Reset</button>
+            <button class="btn btn-dim" id="lot-save-journal">→ Save to Journal</button>
+            <button class="btn btn-primary" id="lot-copy">Copy Report</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Results -->
+        <div class="col-results">
+
+          <!-- Hero lot -->
+          <div class="hero-card">
+            <div class="hero-eyebrow">Recommended Lot Size</div>
+            <div class="hero-number" id="hero-lot">—</div>
+            <div class="hero-meta">
+              <span class="hero-tag loss">Loss <span id="hero-loss">—</span></span>
+              <span class="hero-tag profit">Profit <span id="hero-profit">—</span></span>
+              <span class="hero-tag neutral">R:R <span id="hero-rr">—</span></span>
+            </div>
+          </div>
+
+          <!-- Visualizer -->
+          <div class="viz-card">
+            <div class="viz-inner" id="trade-viz">
+              <div class="viz-bg">
+                <div class="viz-tp-zone" id="viz-tp-zone"></div>
+                <div class="viz-sl-zone" id="viz-sl-zone"></div>
+              </div>
+              <div class="viz-entry-line" id="viz-entry-line"></div>
+              <div class="viz-lbl viz-lbl-tp" id="viz-label-tp">TP —</div>
+              <div class="viz-lbl viz-lbl-entry" id="viz-label-entry">Entry —</div>
+              <div class="viz-lbl viz-lbl-sl" id="viz-label-sl">SL —</div>
+              <div class="viz-axis">
+                <span id="viz-axis-top">—</span>
+                <span id="viz-axis-mid">—</span>
+                <span id="viz-axis-bot">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk gauge -->
+          <div class="gauge-card">
+            <div class="gauge-hdr"><span>Risk Level</span><span class="gauge-status" id="gauge-status">—</span></div>
+            <div class="gauge-track"><div class="gauge-fill" id="gauge-fill"></div></div>
+            <div class="gauge-marks"><span>0.25%</span><span>1%</span><span>2%</span><span>5%+</span></div>
+          </div>
+
+          <!-- Results grid -->
+          <div class="results-block">
+            <div class="results-title">Breakdown</div>
+            <div class="results-grid">
+              <div class="r-row"><span class="r-lbl">Direction</span><span class="r-val" id="lot-dir-display">—</span></div>
+              <div class="r-row"><span class="r-lbl">SL Distance</span><span class="r-val" id="lot-sl-dist">—</span></div>
+              <div class="r-row"><span class="r-lbl">Pip Distance</span><span class="r-val" id="lot-pip-dist">—</span></div>
+              <div class="r-row hi"><span class="r-lbl">Effective SL (w/ spread)</span><span class="r-val" id="lot-effective-sl">—</span></div>
+              <div class="r-row"><span class="r-lbl">Spread Cost</span><span class="r-val red" id="lot-spread-cost">—</span></div>
+              <div class="r-row"><span class="r-lbl">Risk per 1 Lot</span><span class="r-val" id="lot-risk-per-lot">—</span></div>
+              <div class="r-row hi"><span class="r-lbl">Raw Lot</span><span class="r-val" id="lot-size">—</span></div>
+              <div class="r-row hi"><span class="r-lbl">Rounded Lot</span><span class="r-val accent" id="lot-rounded">—</span></div>
+              <div class="r-row"><span class="r-lbl">Gross Loss</span><span class="r-val red" id="lot-loss">—</span></div>
+              <div class="r-row"><span class="r-lbl">Commission</span><span class="r-val red" id="lot-commission-cost">—</span></div>
+              <div class="r-row hi"><span class="r-lbl">Total Cost</span><span class="r-val red" id="lot-total-cost">—</span></div>
+              <div class="r-row"><span class="r-lbl">Gross Profit</span><span class="r-val green" id="lot-profit">—</span></div>
+              <div class="r-row hi"><span class="r-lbl">Net Profit</span><span class="r-val green" id="lot-net-profit">—</span></div>
+              <div class="r-row"><span class="r-lbl">Risk : Reward</span><span class="r-val" id="lot-rr">—</span></div>
+              <div class="r-row"><span class="r-lbl">Margin Required</span><span class="r-val" id="lot-margin">—</span></div>
+              <div class="r-row"><span class="r-lbl">Exposure</span><span class="r-val" id="lot-exposure">—</span></div>
+              <div class="r-row"><span class="r-lbl">Effective Leverage</span><span class="r-val" id="lot-eff-lev">—</span></div>
+            </div>
+          </div>
+
+          <!-- Market Snapshot -->
+          <div class="snap-card">
+            <div class="snap-title">Market Snapshot</div>
+            <div class="snap-grid">
+              <div class="snap-row"><span>Symbol</span><span id="spec-symbol">—</span></div>
+              <div class="snap-row"><span>Contract</span><span id="spec-contract">—</span></div>
+              <div class="snap-row"><span>Pip Size</span><span id="spec-pip">—</span></div>
+              <div class="snap-row"><span>Tick Size</span><span id="spec-tick">—</span></div>
+              <div class="snap-row"><span>Pip Value/lot</span><span id="pip-value-display">—</span></div>
+              <div class="snap-row"><span>Lot Step</span><span id="spec-lot-step">—</span></div>
+              <div class="snap-row"><span>Margin Ccy</span><span id="spec-margin-ccy">—</span></div>
+              <div class="snap-row"><span>Leverage</span><span id="spec-leverage">—</span></div>
+            </div>
+          </div>
+
+          <!-- Formula breakdown -->
+          <details class="formula-block">
+            <summary>Step-by-step Formula</summary>
+            <div id="formula-breakdown" class="formula-body">
+              <p class="formula-empty">Run a calculation to see the math.</p>
+            </div>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ PIP VALUE ══════════════ -->
+    <section class="panel" id="pip" role="tabpanel">
+      <div class="panel-title">Pip Value Calculator</div>
+      <div class="card">
+        <div class="row-2">
+          <div class="field"><label>Symbol</label><input type="text" id="pip-symbol" value="EURUSD" /></div>
+          <div class="field"><label>Current Price</label><input type="number" id="pip-price" value="1.0850" step="any" /></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Contract Size</label><input type="number" id="pip-contract" value="100000" step="any" /></div>
+          <div class="field"><label>Pip Size</label><input type="number" id="pip-size" value="0.0001" step="any" /></div>
+          <div class="field"><label>Lot Size</label><input type="number" id="pip-lot" value="1" step="any" /></div>
+        </div>
+        <div class="divider"></div>
+        <div class="results-grid single-col">
+          <div class="r-row hi"><span class="r-lbl">Pip Value</span><span class="r-val accent" id="pip-value">—</span></div>
+          <div class="r-row"><span class="r-lbl">Tick Value</span><span class="r-val" id="tick-value">—</span></div>
+          <div class="r-row"><span class="r-lbl">Point Value</span><span class="r-val" id="point-value">—</span></div>
+          <div class="r-row"><span class="r-lbl">10-Pip Move</span><span class="r-val" id="pip-10">—</span></div>
+          <div class="r-row"><span class="r-lbl">100-Pip Move</span><span class="r-val" id="pip-100">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="pip-reset">Reset</button>
+          <button class="btn btn-primary" id="pip-copy">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ PROFIT ══════════════ -->
+    <section class="panel" id="profit" role="tabpanel">
+      <div class="panel-title">Profit / P&L Calculator</div>
+      <div class="card">
+        <div class="row-3">
+          <div class="field"><label>Direction</label><select id="profit-direction"><option value="buy">Buy (Long)</option><option value="sell">Sell (Short)</option></select></div>
+          <div class="field"><label>Entry</label><input type="number" id="profit-entry" value="1.0850" step="any" /></div>
+          <div class="field"><label>Exit</label><input type="number" id="profit-exit" value="1.0900" step="any" /></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Lot Size</label><input type="number" id="profit-lot" value="0.1" step="any" /></div>
+          <div class="field"><label>Contract Size</label><input type="number" id="profit-contract" value="100000" step="any" /></div>
+          <div class="field"><label>Account (USD)</label><input type="number" id="profit-account" value="10000" step="any" /></div>
+        </div>
+        <div class="divider"></div>
+        <div class="results-grid single-col">
+          <div class="r-row hi"><span class="r-lbl">Profit / Loss</span><span class="r-val" id="profit-amount">—</span></div>
+          <div class="r-row"><span class="r-lbl">Return %</span><span class="r-val" id="profit-percent">—</span></div>
+          <div class="r-row"><span class="r-lbl">Price Move</span><span class="r-val" id="profit-move">—</span></div>
+          <div class="r-row"><span class="r-lbl">Pips</span><span class="r-val" id="profit-pips">—</span></div>
+          <div class="r-row"><span class="r-lbl">Direction</span><span class="r-val" id="profit-dir-display">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="profit-reset">Reset</button>
+          <button class="btn btn-primary" id="profit-copy">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ R:R ══════════════ -->
+    <section class="panel" id="rr" role="tabpanel">
+      <div class="panel-title">Risk : Reward Calculator</div>
+      <div class="card">
+        <div class="row-2">
+          <div class="field"><label>Direction</label><select id="rr-direction"><option value="buy">Buy (Long)</option><option value="sell">Sell (Short)</option></select></div>
+          <div class="field"><label>Entry</label><input type="number" id="rr-entry" value="1.0850" step="any" /></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Stop Loss</label><input type="number" id="rr-sl" value="1.0800" step="any" /></div>
+          <div class="field"><label>Take Profit</label><input type="number" id="rr-tp" value="1.0950" step="any" /></div>
+        </div>
+        <div class="divider"></div>
+        <div class="results-grid single-col">
+          <div class="r-row"><span class="r-lbl">Direction</span><span class="r-val" id="rr-dir-display">—</span></div>
+          <div class="r-row"><span class="r-lbl">Risk Distance</span><span class="r-val red" id="rr-risk">—</span></div>
+          <div class="r-row"><span class="r-lbl">Reward Distance</span><span class="r-val green" id="rr-reward">—</span></div>
+          <div class="r-row hi"><span class="r-lbl">R : R Ratio</span><span class="r-val accent" id="rr-ratio">—</span></div>
+          <div class="r-row"><span class="r-lbl">Break-Even Win Rate</span><span class="r-val" id="rr-winrate">—</span></div>
+          <div class="r-row"><span class="r-lbl">Trade Quality</span><span class="r-val" id="rr-quality">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="rr-reset">Reset</button>
+          <button class="btn btn-primary" id="rr-copy">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ MARGIN ══════════════ -->
+    <section class="panel" id="margin" role="tabpanel">
+      <div class="panel-title">Margin Calculator</div>
+      <div class="card">
+        <div class="row-2">
+          <div class="field"><label>Symbol</label><input type="text" id="margin-symbol" value="EURUSD" /></div>
+          <div class="field"><label>Lot Size</label><input type="number" id="margin-lot" value="0.1" step="any" /></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Contract Size</label><input type="number" id="margin-contract" value="100000" step="any" /></div>
+          <div class="field"><label>Price</label><input type="number" id="margin-price" value="1.0850" step="any" /></div>
+          <div class="field"><label>Leverage</label><input type="number" id="margin-leverage" value="100" step="any" /></div>
+        </div>
+        <div class="field"><label>Account (USD)</label><input type="number" id="margin-account" value="10000" step="any" /></div>
+        <div class="divider"></div>
+        <div class="results-grid single-col">
+          <div class="r-row hi"><span class="r-lbl">Margin Required</span><span class="r-val accent" id="margin-required">—</span></div>
+          <div class="r-row"><span class="r-lbl">Position Value</span><span class="r-val" id="margin-exposure">—</span></div>
+          <div class="r-row"><span class="r-lbl">Effective Leverage</span><span class="r-val" id="margin-effective">—</span></div>
+          <div class="r-row hi"><span class="r-lbl">Account Usage</span><span class="r-val" id="margin-percent">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="margin-reset">Reset</button>
+          <button class="btn btn-primary" id="margin-copy">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ PROP FIRM ══════════════ -->
+    <section class="panel" id="propfirm" role="tabpanel">
+      <div class="panel-title">Prop Firm Rules Checker</div>
+      <div class="card">
+        <div class="field">
+          <label>Prop Firm</label>
+          <select id="prop-firm">
+            <option value="ftmo">FTMO — 5% daily / 10% max</option>
+            <option value="myforexfunds">MyForexFunds — 4% daily / 8% max</option>
+            <option value="fundednext">FundedNext — 5% daily / 10% max</option>
+            <option value="the5ers">The5%ers — 3% daily / 4% max</option>
+            <option value="goat">Goat Funded — 4% daily / 8% max</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Account (USD)</label><input type="number" id="prop-account" value="100000" step="any" /></div>
+          <div class="field"><label>Current Balance (USD)</label><input type="number" id="prop-balance" value="100000" step="any" /></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Daily Loss Limit %</label><input type="number" id="prop-daily" value="5" step="0.1" /></div>
+          <div class="field"><label>Max Loss Limit %</label><input type="number" id="prop-max" value="10" step="0.1" /></div>
+          <div class="field"><label>Profit Target %</label><input type="number" id="prop-target" value="10" step="0.1" /></div>
+        </div>
+        <div class="divider"></div>
+        <div class="results-grid single-col">
+          <div class="r-row hi"><span class="r-lbl">Max Daily Loss</span><span class="r-val red" id="prop-max-daily">—</span></div>
+          <div class="r-row hi"><span class="r-lbl">Max Total Loss</span><span class="r-val red" id="prop-max-total">—</span></div>
+          <div class="r-row"><span class="r-lbl">Daily Floor</span><span class="r-val" id="prop-daily-floor">—</span></div>
+          <div class="r-row"><span class="r-lbl">Total Floor</span><span class="r-val" id="prop-total-floor">—</span></div>
+          <div class="r-row"><span class="r-lbl">Profit Target</span><span class="r-val green" id="prop-target-amt">—</span></div>
+          <div class="r-row"><span class="r-lbl">Current P/L</span><span class="r-val" id="prop-current-pl">—</span></div>
+          <div class="r-row"><span class="r-lbl">Remaining Daily</span><span class="r-val" id="prop-remaining-daily">—</span></div>
+          <div class="r-row"><span class="r-lbl">Remaining Total</span><span class="r-val" id="prop-remaining-total">—</span></div>
+          <div class="r-row hi"><span class="r-lbl">Status</span><span class="r-val" id="prop-status">—</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="prop-reset">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ DRAWDOWN ══════════════ -->
+    <section class="panel" id="dd" role="tabpanel">
+      <div class="panel-title">Drawdown Simulator</div>
+      <div class="card">
+        <p class="panel-desc">Shows your balance after N consecutive losses at a fixed risk %.</p>
+        <div class="row-3">
+          <div class="field"><label>Account (USD)</label><input type="number" id="dd-account" value="10000" step="any" /></div>
+          <div class="field"><label>Risk per Trade %</label><input type="number" id="dd-risk" value="1" step="0.1" min="0" max="100" /></div>
+          <div class="field"><label>Number of Losses</label><input type="number" id="dd-losses" value="10" min="1" max="1000" /></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="dd-calc">Simulate</button>
+        </div>
+        <div class="divider"></div>
+        <div id="dd-output" class="table-wrap">Enter values and click Simulate.</div>
+      </div>
+    </section>
+
+    <!-- ══════════════ JOURNAL ══════════════ -->
+    <section class="panel" id="journal" role="tabpanel">
+      <div class="panel-title">Trade Journal</div>
+
+      <div class="stats-row">
+        <div class="stat-pill"><span class="sp-lbl">Trades</span><span class="sp-val" id="journal-total">0</span></div>
+        <div class="stat-pill"><span class="sp-lbl">Win Rate</span><span class="sp-val" id="journal-winrate">0%</span></div>
+        <div class="stat-pill"><span class="sp-lbl">Total P/L</span><span class="sp-val" id="journal-pl">$0</span></div>
+        <div class="stat-pill"><span class="sp-lbl">Profit Factor</span><span class="sp-val" id="journal-pf">0.0</span></div>
+      </div>
+
+      <div class="card journal-form-card">
+        <div class="section-label">Add Trade</div>
+        <div class="row-3">
+          <div class="field"><label>Date</label><input type="date" id="trade-date" /></div>
+          <div class="field"><label>Symbol</label><input type="text" id="trade-symbol" placeholder="EURUSD" /></div>
+          <div class="field"><label>Direction</label><select id="trade-direction"><option value="long">Long</option><option value="short">Short</option></select></div>
+        </div>
+        <div class="row-3">
+          <div class="field"><label>Entry</label><input type="number" id="trade-entry" step="any" /></div>
+          <div class="field"><label>Exit</label><input type="number" id="trade-exit" step="any" /></div>
+          <div class="field"><label>Lot</label><input type="number" id="trade-lot" step="any" /></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>P/L (USD)</label><input type="number" id="trade-pnl" step="any" /></div>
+          <div class="field"><label>Notes</label><input type="text" id="trade-notes" placeholder="Optional" /></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="trade-add">Add Trade</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Symbol</th><th>Dir</th><th>Entry</th><th>Exit</th><th>Lot</th><th>P/L</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="journal-tbody"><tr><td colspan="9" class="empty-row">No trades recorded yet</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm" id="journal-export-csv">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" id="journal-export-json">Export JSON</button>
+        <button class="btn btn-ghost btn-sm" id="journal-import">Import JSON</button>
+        <input type="file" id="journal-import-file" accept=".json" />
+        <button class="btn btn-danger btn-sm" id="journal-clear">Clear All</button>
+      </div>
+    </section>
+
+    <!-- ══════════════ DASHBOARD ══════════════ -->
+    <section class="panel" id="dashboard" role="tabpanel">
+      <div class="panel-title">Risk Dashboard</div>
+
+      <div class="card">
+        <div class="field" style="max-width:280px">
+          <label>Account (USD)</label>
+          <input type="number" id="dash-account-input" value="10000" step="any" />
+        </div>
+        <div class="dash-stat-grid">
+          <div class="dash-stat"><div class="ds-lbl">Account Balance</div><div class="ds-val" id="dash-account">$10,000</div></div>
+          <div class="dash-stat"><div class="ds-lbl">Risk / Trade</div><div class="ds-val accent" id="dash-risk">$100</div></div>
+          <div class="dash-stat"><div class="ds-lbl">Max Daily Loss</div><div class="ds-val red" id="dash-daily">$500 (5%)</div></div>
+          <div class="dash-stat"><div class="ds-lbl">Max Open Risk</div><div class="ds-val" id="dash-open">$0</div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-label">Risk Limits</div>
+        <div class="slider-row"><label>Max Risk per Trade <strong id="dash-trade-pct">2%</strong></label><input type="range" id="dash-trade-slider" min="0.1" max="5" step="0.1" value="2" /></div>
+        <div class="slider-row"><label>Max Daily Loss <strong id="dash-daily-pct">5%</strong></label><input type="range" id="dash-daily-slider" min="1" max="20" step="0.5" value="5" /></div>
+        <div class="slider-row"><label>Max Open Risk <strong id="dash-open-pct">10%</strong></label><input type="range" id="dash-open-slider" min="1" max="30" step="1" value="10" /></div>
+        <div class="bar-row"><div class="bar-track"><div class="bar-fill" id="risk-bar"></div></div><div class="bar-label" id="risk-status">Conservative</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Risk Heatmap</div>
+        <div class="field" style="max-width:240px"><label>Account Size</label><input type="number" id="hm-account" value="10000" step="any" /></div>
+        <div id="hm-output" class="table-wrap"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">Multi-Position Risk</div>
+        <div class="field" style="max-width:240px"><label>Account</label><input type="number" id="mp-account" value="10000" step="any" /></div>
+        <div class="row-3">
+          <div class="field"><label>Trade 1 %</label><input type="number" id="mp-risk-1" value="1" step="0.1" min="0" /></div>
+          <div class="field"><label>Trade 2 %</label><input type="number" id="mp-risk-2" value="0" step="0.1" min="0" /></div>
+          <div class="field"><label>Trade 3 %</label><input type="number" id="mp-risk-3" value="0" step="0.1" min="0" /></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Trade 4 %</label><input type="number" id="mp-risk-4" value="0" step="0.1" min="0" /></div>
+          <div class="field"><label>Trade 5 %</label><input type="number" id="mp-risk-5" value="0" step="0.1" min="0" /></div>
+        </div>
+        <div id="mp-output" class="table-wrap"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="calculators.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
