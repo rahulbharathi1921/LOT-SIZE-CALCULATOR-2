@@ -3,6 +3,7 @@ const App = {
 
   init() {
     this.setupTheme();
+    this.setupMobileMenu();
     this.setupTabs();
     this.setupLotCalculator();
     this.setupPipCalculator();
@@ -75,6 +76,29 @@ const App = {
       document.documentElement.className = isLight ? 'dark-mode' : 'light-mode';
       btn.textContent = isLight ? '🌙' : '☀️';
       localStorage.setItem('edge_theme', isLight ? 'dark' : 'light');
+    });
+  },
+
+  setupMobileMenu() {
+    const btn = document.getElementById('menu-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('backdrop');
+    const navItems = document.querySelectorAll('.nav-item');
+    btn.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('visible');
+    });
+    backdrop.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('visible');
+    });
+    navItems.forEach(function(item) {
+      item.addEventListener('click', function() {
+        if (window.innerWidth < 860) {
+          sidebar.classList.remove('open');
+          backdrop.classList.remove('visible');
+        }
+      });
     });
   },
 

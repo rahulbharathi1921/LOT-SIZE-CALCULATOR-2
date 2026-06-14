@@ -76,6 +76,9 @@
 
     <!-- Top bar metrics -->
     <div class="topbar">
+      <button class="hamburger" id="menu-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="metric"><span class="metric-lbl">Account</span><span class="metric-val" id="mtr-balance">$10,000</span></div>
       <div class="metric-divider"></div>
       <div class="metric"><span class="metric-lbl">Risk / Trade</span><span class="metric-val accent" id="mtr-risk">$100</span></div>
@@ -707,5 +710,6 @@
 <script src="ui.js"></script>
 <script src="app.js"></script>
 <script src="clock.js"></script>
+<div class="backdrop" id="backdrop"></div>
 </body>
 </html>
