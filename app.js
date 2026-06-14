@@ -2,6 +2,7 @@ const App = {
   trades: [],
 
   init() {
+    this.setupTheme();
     this.setupTabs();
     this.setupLotCalculator();
     this.setupPipCalculator();
@@ -62,6 +63,19 @@ const App = {
     if (val) {
       this.syncAccount(val, null);
     }
+  },
+
+  setupTheme() {
+    const saved = localStorage.getItem('edge_theme') || 'dark';
+    const btn = document.getElementById('theme-toggle');
+    document.documentElement.className = saved === 'light' ? 'light-mode' : 'dark-mode';
+    btn.textContent = saved === 'light' ? '☀️' : '🌙';
+    btn.addEventListener('click', function() {
+      const isLight = document.documentElement.className === 'light-mode';
+      document.documentElement.className = isLight ? 'dark-mode' : 'light-mode';
+      btn.textContent = isLight ? '🌙' : '☀️';
+      localStorage.setItem('edge_theme', isLight ? 'dark' : 'light');
+    });
   },
 
   setupTabs() {
