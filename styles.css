@@ -1287,6 +1287,8 @@ input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin
 }
 .wl-sym { font-size: 12px; font-weight: 700; color: var(--accent); }
 .wl-price { font-family: var(--mono); font-size: 11px; color: var(--text); }
+.wl-price.wl-frozen { opacity: 0.5; }
+.wl-closed { font-size: 8px; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.05em; }
 .wl-pip { font-family: var(--mono); font-size: 10px; color: var(--green); }
 .wl-perlot { font-family: var(--mono); font-size: 9px; color: var(--text-3); }
 

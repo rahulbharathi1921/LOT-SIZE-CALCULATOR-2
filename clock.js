@@ -6,12 +6,16 @@ const TraderClock = {
   },
 
   WATCHLIST: [
-    { symbol: 'EURUSD', contract: 100000, pipSize: 0.0001 },
-    { symbol: 'GBPUSD', contract: 100000, pipSize: 0.0001 },
-    { symbol: 'USDJPY', contract: 100000, pipSize: 0.01 },
-    { symbol: 'XAUUSD', contract: 100, pipSize: 0.01 },
-    { symbol: 'GBPJPY', contract: 100000, pipSize: 0.01 }
+    { symbol: 'EURUSD', contract: 100000, pipSize: 0.0001, crypto: false },
+    { symbol: 'GBPUSD', contract: 100000, pipSize: 0.0001, crypto: false },
+    { symbol: 'USDJPY', contract: 100000, pipSize: 0.01, crypto: false },
+    { symbol: 'XAUUSD', contract: 100, pipSize: 0.01, crypto: false },
+    { symbol: 'GBPJPY', contract: 100000, pipSize: 0.01, crypto: false },
+    { symbol: 'BTCUSD', contract: 1, pipSize: 0.01, crypto: true },
+    { symbol: 'ETHUSD', contract: 1, pipSize: 0.01, crypto: true }
   ],
+
+  _frozenPrices: {},
 
   EVENTS: [
     { name: 'NFP (Non-Farm Payrolls)', day: 5, impact: 'high', getDate: (y,m) => {
@@ -342,22 +346,45 @@ const TraderClock = {
 
   updateWatchlist(now) {
     const el = document.getElementById('clock-watchlist');
+    const isWknd = this.isWeekend(now);
     let html = '';
     this.WATCHLIST.forEach(w => {
-      const simPrice = w.symbol === 'XAUUSD' ? 2330 + Math.sin(now.getTime() / 3600000) * 15 :
-                       w.symbol === 'USDJPY' ? 149 + Math.sin(now.getTime() / 3600000) * 2 :
-                       w.symbol === 'GBPJPY' ? 189 + Math.sin(now.getTime() / 3600000) * 3 :
-                       w.symbol === 'GBPUSD' ? 1.27 + Math.sin(now.getTime() / 3600000) * 0.02 :
-                       1.09 + Math.sin(now.getTime() / 3600000) * 0.015;
+      const isCrypto = w.crypto;
+      let simPrice;
+      if (isCrypto) {
+        simPrice = w.symbol === 'BTCUSD' ? 68000 + Math.sin(now.getTime() / 1800000) * 1200 :
+                                      3400 + Math.sin(now.getTime() / 1800000) * 80;
+      } else if (isWknd && !this._frozenPrices[w.symbol]) {
+        simPrice = this._simPrice(w.symbol, now);
+        this._frozenPrices[w.symbol] = simPrice;
+      } else if (isWknd) {
+        simPrice = this._frozenPrices[w.symbol];
+      } else {
+        simPrice = this._simPrice(w.symbol, now);
+        this._frozenPrices[w.symbol] = simPrice;
+      }
       const pipVal = getEffectivePipValue(w.symbol, simPrice);
+      const precision = w.pipSize <= 0.0001 ? 5 : w.pipSize <= 0.01 ? 3 : 2;
       html += `<div class="wl-item">
         <span class="wl-sym">${w.symbol}</span>
-        <span class="wl-price">${simPrice.toFixed(w.pipSize <= 0.0001 ? 5 : w.pipSize <= 0.01 ? 3 : 2)}</span>
+        <span class="wl-price${isWknd && !isCrypto ? ' wl-frozen' : ''}">${simPrice.toFixed(precision)}</span>
         <span class="wl-pip">$${pipVal.toFixed(2)}/pip</span>
         <span class="wl-perlot">$${(pipVal * 10).toFixed(2)}/10pip</span>
+        ${isWknd && !isCrypto ? '<span class="wl-closed">Markets Closed</span>' : ''}
       </div>`;
     });
     el.innerHTML = html;
+  },
+
+  _simPrice(symbol, now) {
+    const t = now.getTime() / 3600000;
+    switch (symbol) {
+      case 'XAUUSD': return 2330 + Math.sin(t) * 15;
+      case 'USDJPY': return 149 + Math.sin(t) * 2;
+      case 'GBPJPY': return 189 + Math.sin(t) * 3;
+      case 'GBPUSD': return 1.27 + Math.sin(t) * 0.02;
+      default: return 1.09 + Math.sin(t) * 0.015;
+    }
   },
 
   start() {
