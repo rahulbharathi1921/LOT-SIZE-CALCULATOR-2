@@ -16,6 +16,8 @@ const TraderClock = {
   ],
 
   _frozenPrices: {},
+  _realPrices: null,
+  _lastFetch: 0,
 
   EVENTS: [
     { name: 'NFP (Non-Farm Payrolls)', day: 5, impact: 'high', getDate: (y,m) => {
@@ -345,46 +347,66 @@ const TraderClock = {
   },
 
   updateWatchlist(now) {
+    this.fetchPrices();
     const el = document.getElementById('clock-watchlist');
     const isWknd = this.isWeekend(now);
     let html = '';
     this.WATCHLIST.forEach(w => {
       const isCrypto = w.crypto;
-      let simPrice;
-      if (isCrypto) {
-        simPrice = w.symbol === 'BTCUSD' ? 68000 + Math.sin(now.getTime() / 1800000) * 1200 :
-                                      3400 + Math.sin(now.getTime() / 1800000) * 80;
-      } else if (isWknd && !this._frozenPrices[w.symbol]) {
-        simPrice = this._simPrice(w.symbol, now);
-        this._frozenPrices[w.symbol] = simPrice;
-      } else if (isWknd) {
-        simPrice = this._frozenPrices[w.symbol];
+      let price;
+      if (this._realPrices && this._realPrices[w.symbol] !== undefined) {
+        price = this._realPrices[w.symbol];
       } else {
-        simPrice = this._simPrice(w.symbol, now);
-        this._frozenPrices[w.symbol] = simPrice;
+        price = this.FALLBACK[w.symbol];
       }
-      const pipVal = getEffectivePipValue(w.symbol, simPrice);
+      if (!price) { html += `<div class="wl-item"><span class="wl-sym">${w.symbol}</span><span class="wl-price">—</span></div>`; return; }
+      const pipVal = getEffectivePipValue(w.symbol, price);
       const precision = w.pipSize <= 0.0001 ? 5 : w.pipSize <= 0.01 ? 3 : 2;
+      const frozen = isWknd && !isCrypto;
       html += `<div class="wl-item">
         <span class="wl-sym">${w.symbol}</span>
-        <span class="wl-price${isWknd && !isCrypto ? ' wl-frozen' : ''}">${simPrice.toFixed(precision)}</span>
+        <span class="wl-price${frozen ? ' wl-frozen' : ''}">${price.toFixed(precision)}</span>
         <span class="wl-pip">$${pipVal.toFixed(2)}/pip</span>
         <span class="wl-perlot">$${(pipVal * 10).toFixed(2)}/10pip</span>
-        ${isWknd && !isCrypto ? '<span class="wl-closed">Markets Closed</span>' : ''}
+        ${frozen ? '<span class="wl-closed">Markets Closed</span>' : ''}
       </div>`;
     });
     el.innerHTML = html;
   },
 
-  _simPrice(symbol, now) {
-    const t = now.getTime() / 3600000;
-    switch (symbol) {
-      case 'XAUUSD': return 2330 + Math.sin(t) * 15;
-      case 'USDJPY': return 149 + Math.sin(t) * 2;
-      case 'GBPJPY': return 189 + Math.sin(t) * 3;
-      case 'GBPUSD': return 1.27 + Math.sin(t) * 0.02;
-      default: return 1.09 + Math.sin(t) * 0.015;
-    }
+  FALLBACK: { EURUSD: 1.09, GBPUSD: 1.28, USDJPY: 150.0, XAUUSD: 2330, GBPJPY: 190.0, BTCUSD: 68000, ETHUSD: 3400 },
+
+  async fetchPrices() {
+    const now = Date.now();
+    if (now - this._lastFetch < 30000) return;
+    this._lastFetch = now;
+    const p = { ...this.FALLBACK };
+    try {
+      const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR,GBP,JPY');
+      const data = await res.json();
+      if (data.rates) {
+        p.EURUSD = 1 / data.rates.EUR;
+        p.GBPUSD = 1 / data.rates.GBP;
+        p.USDJPY = data.rates.JPY;
+      }
+    } catch(e) {}
+    try {
+      const res2 = await fetch('https://api.frankfurter.app/latest?from=GBP&to=JPY');
+      const data2 = await res2.json();
+      if (data2.rates) p.GBPJPY = data2.rates.JPY;
+    } catch(e) {}
+    try {
+      const res3 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
+      const data3 = await res3.json();
+      if (data3.bitcoin) p.BTCUSD = data3.bitcoin.usd;
+      if (data3.ethereum) p.ETHUSD = data3.ethereum.usd;
+    } catch(e) {}
+    try {
+      const res4 = await fetch('https://api.gold-api.com/price/XAU');
+      const data4 = await res4.json();
+      if (data4.price) p.XAUUSD = data4.price;
+    } catch(e) {}
+    this._realPrices = p;
   },
 
   start() {
