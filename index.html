@@ -60,6 +60,10 @@
         <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
         Dashboard
       </button>
+      <button class="nav-item" data-tab="clock" role="tab">
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Trader Clock
+      </button>
     </nav>
 
     <div class="sidebar-footer">
@@ -555,6 +559,154 @@
       </div>
     </section>
 
+    <!-- ══════════════ TRADER CLOCK ══════════════ -->
+    <section class="panel" id="clock" role="tabpanel">
+      <div class="clock-dashboard">
+
+        <!-- Header -->
+        <div class="clock-header">
+          <div class="clock-title">TRADER CLOCK DASHBOARD</div>
+          <div class="clock-sub">Professional Forex Session Monitor</div>
+        </div>
+
+        <!-- Master Clocks -->
+        <div class="clock-masters">
+          <div class="master-card">
+            <div class="master-label">INDIA STANDARD TIME (IST)</div>
+            <div class="master-time" id="clock-ist">00:00:00</div>
+          </div>
+          <div class="master-card">
+            <div class="master-label">COORDINATED UNIVERSAL TIME (UTC)</div>
+            <div class="master-time" id="clock-utc">00:00:00</div>
+          </div>
+        </div>
+
+        <!-- Market Status -->
+        <div class="clock-status-card">
+          <div class="clock-status-hdr">Current Market State</div>
+          <div class="clock-status-body">
+            <span class="status-badge" id="clock-market-status">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Session Cards -->
+        <div class="clock-sessions">
+          <div class="session-card" id="session-tokyo">
+            <div class="session-name">TOKYO <span class="dst-badge" id="tokyo-dst">JST</span></div>
+            <div class="session-time" id="tokyo-hours">00:00 – 09:00 UTC</div>
+            <div class="session-ist-ref" id="tokyo-ist">05:30 – 14:30 IST</div>
+            <div class="session-status" id="tokyo-status">Loading...</div>
+            <div class="session-countdown">
+              <span class="cd-label" id="tokyo-cd-label">—</span>
+              <span class="cd-time" id="tokyo-cd-time">—</span>
+            </div>
+            <div class="session-progress-track"><div class="session-progress-fill" id="tokyo-progress"></div></div>
+            <div class="session-progress-pct" id="tokyo-pct">0%</div>
+          </div>
+          <div class="session-card" id="session-london">
+            <div class="session-name">LONDON <span class="dst-badge" id="london-dst">GMT</span></div>
+            <div class="session-time" id="london-hours">08:00 – 17:00 UTC</div>
+            <div class="session-ist-ref" id="london-ist">13:30 – 22:30 IST</div>
+            <div class="session-status" id="london-status">Loading...</div>
+            <div class="session-countdown">
+              <span class="cd-label" id="london-cd-label">—</span>
+              <span class="cd-time" id="london-cd-time">—</span>
+            </div>
+            <div class="session-progress-track"><div class="session-progress-fill" id="london-progress"></div></div>
+            <div class="session-progress-pct" id="london-pct">0%</div>
+          </div>
+          <div class="session-card" id="session-newyork">
+            <div class="session-name">NEW YORK <span class="dst-badge" id="ny-dst">EST</span></div>
+            <div class="session-time" id="ny-hours">13:00 – 22:00 UTC</div>
+            <div class="session-ist-ref" id="ny-ist">18:30 – 03:30 IST</div>
+            <div class="session-status" id="ny-status">Loading...</div>
+            <div class="session-countdown">
+              <span class="cd-label" id="ny-cd-label">—</span>
+              <span class="cd-time" id="ny-cd-time">—</span>
+            </div>
+            <div class="session-progress-track"><div class="session-progress-fill" id="ny-progress"></div></div>
+            <div class="session-progress-pct" id="ny-pct">0%</div>
+          </div>
+        </div>
+
+        <!-- Overlap + Countdown + Quality row -->
+        <div class="clock-mid-row">
+          <div class="clock-mid-card">
+            <div class="mid-card-title">Session Overlap</div>
+            <div class="mid-card-main" id="clock-overlap">No Active Overlap</div>
+            <div class="mid-card-sub">Volatility: <span id="clock-volatility">Low</span></div>
+          </div>
+          <div class="clock-mid-card">
+            <div class="mid-card-title">Next Session</div>
+            <div class="mid-card-main" id="clock-next-name">—</div>
+            <div class="mid-card-sub">Opens in: <span id="clock-next-countdown">—</span></div>
+          </div>
+          <div class="clock-mid-card">
+            <div class="mid-card-title">Market Quality</div>
+            <div class="mid-card-main" id="clock-quality">Low Trading Conditions</div>
+            <div class="mid-card-sub" id="clock-quality-sub">Check session times</div>
+          </div>
+        </div>
+
+        <!-- Weekend countdown -->
+        <div class="clock-weekend" id="clock-weekend">
+          <div class="weekend-title">⛔ MARKET CLOSED — WEEKEND</div>
+          <div class="weekend-sub">Forex markets are closed until Monday 00:00 UTC</div>
+          <div class="weekend-countdown" id="clock-weekend-cd">00d 00h 00m 00s</div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="clock-timeline-card">
+          <div class="timeline-title">Trading Day Timeline (UTC)</div>
+          <div class="timeline-track" id="clock-timeline">
+            <div class="tl-event" data-time="0"><span class="tl-dot"></span><span class="tl-label">Tokyo Open<br/><small>00:00</small></span></div>
+            <div class="tl-event" data-time="9"><span class="tl-dot"></span><span class="tl-label">Tokyo Close<br/><small>09:00</small></span></div>
+            <div class="tl-event" data-time="8"><span class="tl-dot"></span><span class="tl-label">London Open<br/><small>08:00</small></span></div>
+            <div class="tl-event" data-time="17"><span class="tl-dot"></span><span class="tl-label">London Close<br/><small>17:00</small></span></div>
+            <div class="tl-event" data-time="13"><span class="tl-dot"></span><span class="tl-label">NYSE Open<br/><small>13:00</small></span></div>
+            <div class="tl-event" data-time="22"><span class="tl-dot"></span><span class="tl-label">NYSE Close<br/><small>22:00</small></span></div>
+            <div class="tl-now" id="tl-now"></div>
+          </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="clock-ref-card">
+          <div class="ref-title">Quick Session Reference</div>
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-name">Tokyo</span><span class="ref-utc">00:00 – 09:00 UTC</span><span class="ref-ist" id="ref-tokyo-ist">05:30 – 14:30 IST</span></div>
+            <div class="ref-item"><span class="ref-name">London</span><span class="ref-utc" id="ref-london-utc">08:00 – 17:00 UTC</span><span class="ref-ist" id="ref-london-ist">13:30 – 22:30 IST</span></div>
+            <div class="ref-item"><span class="ref-name">New York</span><span class="ref-utc" id="ref-ny-utc">13:00 – 22:00 UTC</span><span class="ref-ist" id="ref-ny-ist">18:30 – 03:30 IST</span></div>
+          </div>
+        </div>
+
+        <!-- Economic Calendar -->
+        <div class="clock-section-card">
+          <div class="clock-section-title">Today's High-Impact Events</div>
+          <div id="clock-calendar" class="cal-container">Loading events...</div>
+        </div>
+
+        <!-- Watchlist -->
+        <div class="clock-section-card">
+          <div class="clock-section-title">Watchlist — Pip Values</div>
+          <div class="watchlist-grid" id="clock-watchlist">Loading...</div>
+        </div>
+
+        <!-- Session Alerts -->
+        <div class="clock-section-card">
+          <div class="clock-section-title">Session Alerts</div>
+          <div class="alert-row">
+            <label class="alert-toggle">
+              <input type="checkbox" id="alert-toggle" />
+              <span class="alert-slider"></span>
+              <span class="alert-label" id="alert-label">Sound alerts OFF</span>
+            </label>
+            <span class="alert-hint">Beeps when a new session opens</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -564,5 +716,6 @@
 <script src="calculators.js"></script>
 <script src="ui.js"></script>
 <script src="app.js"></script>
+<script src="clock.js"></script>
 </body>
 </html>

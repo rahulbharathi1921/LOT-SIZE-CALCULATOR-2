@@ -326,7 +326,8 @@ const UI = {
       pctEl.textContent = Calc.fmtPct(pct);
       pctEl.className = 'r-val ' + (pct >= 0 ? 'green' : 'red');
       this.setText('profit-move', Calc.fmt(move, 5));
-      this.setText('profit-pips', Calc.fmt(move / 0.0001, 1) + ' pips');
+      const estPipSize = entry > 10 ? 0.01 : 0.0001;
+      this.setText('profit-pips', Calc.fmt(move / estPipSize, 1) + ' pips');
       this.setText('profit-dir-display', direction === 'buy' ? 'Buy (Long)' : 'Sell (Short)');
     } catch (err) { console.error('Profit calc error:', err); }
   },
