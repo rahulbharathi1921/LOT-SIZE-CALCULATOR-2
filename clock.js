@@ -374,7 +374,7 @@ const TraderClock = {
     el.innerHTML = html;
   },
 
-  FALLBACK: { EURUSD: 1.09, GBPUSD: 1.28, USDJPY: 150.0, XAUUSD: 2330, GBPJPY: 190.0, BTCUSD: 68000, ETHUSD: 3400 },
+  FALLBACK: { EURUSD: 1.1569, GBPUSD: 1.3348, USDJPY: 153.47, XAUUSD: 2315.0, GBPJPY: 204.89, BTCUSD: 67892, ETHUSD: 3512 },
 
   async fetchPrices() {
     const now = Date.now();
@@ -385,26 +385,37 @@ const TraderClock = {
       const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR,GBP,JPY');
       const data = await res.json();
       if (data.rates) {
-        p.EURUSD = 1 / data.rates.EUR;
-        p.GBPUSD = 1 / data.rates.GBP;
-        p.USDJPY = data.rates.JPY;
+        p.EURUSD = +(1 / data.rates.EUR).toFixed(5);
+        p.GBPUSD = +(1 / data.rates.GBP).toFixed(5);
+        p.USDJPY = +data.rates.JPY.toFixed(3);
       }
-    } catch(e) {}
+    } catch(e) {
+      try {
+        const alt = await fetch('https://open.er-api.com/v6/latest/USD');
+        const d2 = await alt.json();
+        if (d2.rates) {
+          p.EURUSD = +(1 / d2.rates.EUR).toFixed(5);
+          p.GBPUSD = +(1 / d2.rates.GBP).toFixed(5);
+          p.USDJPY = +d2.rates.JPY.toFixed(3);
+        }
+      } catch(e2) {}
+    }
     try {
       const res2 = await fetch('https://api.frankfurter.app/latest?from=GBP&to=JPY');
       const data2 = await res2.json();
-      if (data2.rates) p.GBPJPY = data2.rates.JPY;
-    } catch(e) {}
+      if (data2.rates) p.GBPJPY = +data2.rates.JPY.toFixed(2);
+    } catch(e) {
+      try {
+        const alt2 = await fetch('https://open.er-api.com/v6/latest/GBP');
+        const d3 = await alt2.json();
+        if (d3.rates) p.GBPJPY = +d3.rates.JPY.toFixed(2);
+      } catch(e2) { p.GBPJPY = +(p.GBPUSD * p.USDJPY).toFixed(2); }
+    }
     try {
       const res3 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd');
       const data3 = await res3.json();
       if (data3.bitcoin) p.BTCUSD = data3.bitcoin.usd;
       if (data3.ethereum) p.ETHUSD = data3.ethereum.usd;
-    } catch(e) {}
-    try {
-      const res4 = await fetch('https://api.gold-api.com/price/XAU');
-      const data4 = await res4.json();
-      if (data4.price) p.XAUUSD = data4.price;
     } catch(e) {}
     this._realPrices = p;
   },
